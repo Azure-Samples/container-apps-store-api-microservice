@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=./build.yaml
+name: Build and Deploy
+on:
+  push:
+    branches: [ main ]
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        services: [ {'imageName': 'node-service', 'directory': './node-service'}, {'imageName': 'python-service', 'directory': './python-service'} , {'imageName': 'go-service', 'directory': './go-service'}  ]
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      containerImage-node: ${{ steps.image-digest.outputs.digest-node-service }}
+      containerImage-python: ${{ steps.image-digest.outputs.digest-python-service }}
+      containerImage-go: ${{ steps.image-digest.outputs.digest-go-service }}
+      containerTag: ${{ fromJson(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ matrix.services.directory }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Output digest
+        id: image-digest
+        run: echo "::set-output name=digest-${{ matrix.services.imageName }}::$(docker inspect ${{ fromJson(steps.meta.outputs.json).tags[0] }} | jq -r '.[].RepoDigests[0]')"
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      # - name: Azure Login
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy bicep
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az extension add -y --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.1.6-py2.py3-none-any.whl
+            az cloud register -n CloudWithCustomEndpoint --endpoint-active-directory https://login.microsoftonline.com/ --endpoint-active-directory-graph-resource-id https://graph.windows.net/ --endpoint-gallery https://gallery.azure.com --endpoint-management https://management.core.windows.net --endpoint-resource-manager https://brazilus.management.azure.com --suffix-storage-endpoint core.windows.net  
+            az cloud set --name CloudWithCustomEndpoint
+            az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT }}
+            az provider register --namespace Microsoft.Web 
+            az group create -g ${{ secrets.RESOURCE_GROUP }} -l northcentralus
+            az deployment group create -g ${{ secrets.RESOURCE_GROUP }} -f ./deploy/main.bicep \
+             -p \
+                nodeImage='${{ needs.build.outputs.containerImage-node }}' \
+                nodePort=3000 \
+                isNodeExternalIngress=true \
+                pythonImage='${{ needs.build.outputs.containerImage-python }}' \
+                pythonPort=5000 \
+                isPythonExternalIngress=true \
+                goImage='${{ needs.build.outputs.containerImage-go }}' \
+                goPort=8050 \
+                isGoExternalIngress=true \
+                containerRegistry=${{ env.REGISTRY }} \
+                containerRegistryUsername=${{ github.actor }} \
+                containerRegistryPassword=${{ secrets.PACKAGES_TOKEN }}

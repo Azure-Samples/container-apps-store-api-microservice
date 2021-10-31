@@ -1,0 +1,73 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "pip install",
+            "command": "pip install -r requirements.txt",
+            "options": {
+                "cwd": "${workspaceFolder}/python-service"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "npm install",
+            "command": "npm install",
+            "options": {
+                "cwd": "${workspaceFolder}/node-service"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "go install",
+            "command": "go install",
+            "options": {
+                "cwd": "${workspaceFolder}/go-service"
+            }
+        },
+        {
+            "appId": "go-app",
+            "appPort": 8050,
+            "label": "daprd-debug-go",
+            "httpPort": 3500,
+            "grpcPort": 50000,
+            "metricsPort": 9090,
+            "type": "daprd"
+        },
+        {
+            "appId": "go-app",
+            "label": "daprd-down-go",
+            "type": "daprd-down"
+        },
+        {
+            "appId": "node-app",
+            "appPort": 3000,
+            "label": "daprd-debug-node",
+            "httpPort": 3501,
+            "grpcPort": 50001,
+            "metricsPort": 9091,
+            "type": "daprd",
+            "dependsOn":["npm install"]
+        },
+        {
+            "appId": "node-app",
+            "label": "daprd-down-node",
+            "type": "daprd-down"
+        },
+        {
+            "appId": "python-app",
+            "appPort": 5000,
+            "label": "daprd-debug-python",
+            "httpPort": 3502,
+            "grpcPort": 50002,
+            "metricsPort": 9092,
+            "type": "daprd",
+            "dependsOn":["pip install"]
+        },
+        {
+            "appId": "python-app",
+            "label": "daprd-down-python",
+            "type": "daprd-down"
+        }
+    ]
+}

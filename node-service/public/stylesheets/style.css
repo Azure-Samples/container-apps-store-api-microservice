@@ -1,0 +1,155 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+*, *:before, *:after {
+  margin: 0;
+  padding: 0;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  padding: 3.5em;
+  background: #ecf0f1;
+}
+@media (max-width: 30em) {
+  body {
+    padding: 1.875em;
+  }
+}
+
+form {
+  font-family: 'Montserrat', sans-serif;
+  background: #ecf0f1;
+  max-width: 25em;
+  font-weight: 400;
+}
+form h1 {
+  font-size: 1.5em;
+  color: #2c3e50;
+  text-rendering: optimizeLegibility;
+}
+form input,
+form textarea {
+  border: none;
+  outline: none;
+  width: 100%;
+  color: #2c3e50;
+  background: #cfd9db;
+  padding: 1em;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -moz-border-radius: none;
+  -webkit-border-radius: none;
+  border-radius: none;
+}
+form input:focus,
+form textarea:focus {
+  -moz-box-shadow: #2c3e50 0 0 0 2px inset;
+  -webkit-box-shadow: #2c3e50 0 0 0 2px inset;
+  box-shadow: #2c3e50 0 0 0 2px inset;
+}
+form textarea {
+  max-width: 25em;
+  min-height: 5.625em;
+  max-height: 12.5em;
+  width: 100%;
+}
+form input[type=submit] {
+  width: 50%;
+  background: #27ae60;
+  color: #ecf0f1;
+}
+form input[type=submit]:focus {
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+form input[type=submit]:active {
+  background: #229955;
+}
+@media (max-width: 30em) {
+  form input[type=submit] {
+    width: 100%;
+  }
+}
+form fieldset {
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: none;
+  margin: 0.75em 0 0.75em 0;
+}
+
+.smart-placeholder {
+  font-size: .875em;
+  color: #77939a;
+  margin: 0.75em 0 0 1.125em;
+}
+
+.parsley-error {
+  -moz-box-shadow: #e74c3c 0 0 0 2px inset;
+  -webkit-box-shadow: #e74c3c 0 0 0 2px inset;
+  box-shadow: #e74c3c 0 0 0 2px inset;
+}
+
+textarea + .parsley-errors-list {
+  margin-top: -.25em;
+}
+
+.parsley-custom-error-message {
+  list-style: none;
+  font-size: .875em;
+  color: #e74c3c;
+  margin: 0.3em 0 0 0;
+}
+
+::-webkit-input-placeholder {
+  color: #94aab0;
+}
+
+:-moz-placeholder {
+  /* Firefox 18- */
+  color: #94aab0;
+}
+
+::-moz-placeholder {
+  /* Firefox 19+ */
+  color: #94aab0;
+}
+
+:-ms-input-placeholder {
+  color: #94aab0;
+}
+
+.success {
+  display: none;
+  color: #2c3e50;
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 2.5em;
+}
+@media (max-width: 30em) {
+  .success {
+    font-size: .875em;
+  }
+}
+.success .name {
+  color: #27ae60;
+  font-weight: 700;
+  font-size: 1.125em;
+}

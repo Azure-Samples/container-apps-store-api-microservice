@@ -81,8 +81,12 @@ The following is needed to run this sample:
 2. Clone the repo: `git clone https://github.com/{username}/container-app-demo`
 3. Build the sample: 
 ```bash
-cd assets
-./init.sh
+cd node-service
+npm install
+cd ../go-service
+go install
+cd ../python-service
+pip install -r requirements.txt
 ```
 4. Run the sample
 ##### Local run and debug
@@ -91,7 +95,7 @@ Dapr will be used to start microservices and enable APIs for things like service
 
 Run the `node-service` (store-api) service in a new terminal window:
 ```bash
-dapr run --app-id node-service --app-port 8080 --dapr-http-port 3600 --components-path ./components -- node app.js
+dapr run --app-id node-service --app-port 3000 --dapr-http-port 3501 --components-path ./components -- npm run start
 ```
 
 Run the `python-service` (order) service in a new terminal window:
@@ -101,7 +105,7 @@ dapr run --app-id python-service --app-port 5000 --dapr-http-port 3500 --compone
 
 Run the `go-service` (inventory) service in a new terminal window:
 ```bash
-dapr run --app-id go-service --app-port 8050 -- go run .
+dapr run --app-id go-service --app-port 8050 --dapr-http-port 3502 -- go run .
 ```
 
 `State reliability`: orders app is configured to bind the Dapr State Store APIs to a local instance of Redis that is preinstalled with Dapr.  When the application is later deployed to Azure Container Apps, the component config yaml will be modified to point to an Azure CosmosDb instance.  No code changes will be needed since the Dapr State Store API is completely portable.  

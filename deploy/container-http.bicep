@@ -8,6 +8,7 @@ param containerRegistry string
 param containerRegistryUsername string
 param env array = []
 param daprComponents array = []
+param minReplicas int = 0
 param secrets array = [
   {
     name: 'docker-password'
@@ -70,7 +71,7 @@ resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
         }
       ]
       scale: {
-      //  minReplicas: 1
+        minReplicas: minReplicas
       //  maxReplicas: 10
       //   rules: [{
       //     name: 'httpscale'

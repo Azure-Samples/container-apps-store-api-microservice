@@ -88,6 +88,7 @@ jobs:
             az group create -g ${{ secrets.RESOURCE_GROUP }} -l northcentralus
             az deployment group create -g ${{ secrets.RESOURCE_GROUP }} -f ./deploy/main.bicep \
              -p \
+                minReplicas=0 \
                 nodeImage='${{ needs.build.outputs.containerImage-node }}' \
                 nodePort=3000 \
                 isNodeExternalIngress=true \

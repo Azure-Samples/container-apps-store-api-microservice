@@ -29,3 +29,4 @@ resource storeapim 'Microsoft.ApiManagement/service@2020-12-01' = {
 }
 
 output apimId string = storeapim.id
+output fqdn string = storeapim.properties.gatewayUrl

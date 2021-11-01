@@ -1,6 +1,7 @@
 param location string = 'northcentralusstage'
 param environmentName string = 'env-${uniqueString(resourceGroup().id)}'
 param apimName string = 'store-api-mgmt-${uniqueString(resourceGroup().id)}'
+param minReplicas int = 0
 param nodeImage string = 'nginx'
 param nodePort int = 3000
 param isNodeExternalIngress bool = true
@@ -57,6 +58,7 @@ module pythonService 'container-http.bicep' = {
     containerImage: pythonImage
     containerPort: pythonPort
     isExternalIngress: isPythonExternalIngress
+    minReplicas: minReplicas
     containerRegistry: containerRegistry
     containerRegistryUsername: containerRegistryUsername
     containerRegistryPassword: containerRegistryPassword
@@ -109,6 +111,7 @@ module goService 'container-http.bicep' = {
     containerImage: goImage
     containerPort: goPort
     isExternalIngress: isGoExternalIngress
+    minReplicas: minReplicas
     containerRegistry: containerRegistry
     containerRegistryUsername: containerRegistryUsername
     containerRegistryPassword: containerRegistryPassword
@@ -126,6 +129,7 @@ module nodeService 'container-http.bicep' = {
     containerImage: nodeImage
     containerPort: nodePort
     isExternalIngress: isNodeExternalIngress
+    minReplicas: minReplicas
     containerRegistry: containerRegistry
     containerRegistryUsername: containerRegistryUsername
     containerRegistryPassword: containerRegistryPassword
@@ -158,3 +162,4 @@ module apimStoreApi 'api-management-api.bicep' = {
 output nodeFqdn string = nodeService.outputs.fqdn
 output pythonFqdn string = pythonService.outputs.fqdn
 output goFqdn string = goService.outputs.fqdn
+output apimFqdn string = apim.outputs.fqdn

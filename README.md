@@ -42,6 +42,7 @@ You can also deploy the solution at anytime using the Azure CLI.
   az group create -n $resourceGroup -l northcentralus
   az deployment group create -g $resourceGroup -f ./deploy/main.bicep \
     -p \
+      minReplicas=0 \
       nodeImage='ghcr.io/azure-samples/container-apps-store-api-microservice/node-service:main' \
       nodePort=3000 \
       isNodeExternalIngress=true \

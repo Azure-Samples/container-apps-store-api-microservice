@@ -13,7 +13,7 @@ IMPORTANT: In general, each microservice should have an independent release and 
 
 ### Github Actions Secrets
 
-## Deploy
+## Deploy and Run
 
 1. Fork the sample repo
 2. Create the following required [encrypted secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment) for the sample
@@ -27,7 +27,8 @@ IMPORTANT: In general, each microservice should have an independent release and 
 3. Open the GitHub Actions, select the **Build and Deploy** action and choose to run the workflow.  
   
     This will start the GitHub Actions which will build the code, publish them to your GitHub repository as private container images, create an Azure Container App environment, a Cosmos DB database, and Container Apps for each of the microservices.
-4. Once the GitHub Actions have completed successfully, navigate to the [Azure Portal](https://portal.azure.com) and select the resource group you created.  Open the `node-app` container, and browse to the URL.  You should see the sample application running.  You can navigate to the `/orders?id=foo` endpoint and `/inventory?id=foo` to test the microservices.
+4. Once the GitHub Actions have completed successfully, navigate to the [Azure Portal](https://portal.azure.com) and select the resource group you created.  Open the `node-app` container, and browse to the URL.  You should see the sample application running.  You can go through the UX to create an order through the order microservice, and then navigate to the `/orders?id=foo` endpoint and `/inventory?id=foo` to get the status via other microservices.  
+5. After calling each microservice, you can open the application insights resource created and select the **Application Map**, you should see a visualization of your calls between Container Apps (note: it may take a few minutes for the app insights data to ingest and process into the app map view).
 
 ## Solution Overview
 
@@ -47,8 +48,9 @@ The ['go-service'](./go-service) is a Go mux app that will retrieve and store th
 ## Build and Run
 
 - [Option 1: Build and run with GitHub Codespaces (recommended)](#option-1-build-and-run-with-github-codespaces-recommended)
-- [Option 2: Build and run with VS Code Remote Containers](#option-2-build-and-run-with-vs-code-remote-containers)
-- [Option 3: Build and run manually](#option-3-build-and-run-manually)
+- [Option 2: Build and run with VS Code Dev Containers](#option-2-build-and-run-with-vs-code-dev-containers)
+- [Option 3: Build and run with VS Code directly](#option-3-build-and-run-with-vs-code-directly)
+- [Option 4: Build and run manually](#option-4-build-and-run-manually)
 
 ### Option 1: Build and run with GitHub Codespaces (recommended)
 
@@ -56,18 +58,43 @@ The ['go-service'](./go-service) is a Go mux app that will retrieve and store th
 - A GitHub account with access to [GitHub Codespaces](https://github.com/features/codespaces)
 
 
-### Option 2: Build and run with VS Code Remote Containers
+### Option 2: Build and run with VS Code Dev Containers
 
 #### Pre-requisites
-- Docker
+- Docker (with docker-compose)
 - VS Code with the [remote containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed
 
-### Option 3: Build and run manually
+#### Steps
+1. Fork the sample repo
+2. Clone the repo: `git clone https://github.com/{username}/container-apps-store-api-microservice`
+3. Open the cloned repo in VS Code
+4. Follow the prompt to open in a dev container
+5. Select the debug **All Containers** and run the sample locally
+
+Any changes made to the project and checked into your GitHub repo will trigger a GitHub action to build and deploy
+
+### Option 3: Build and run with VS Code Directly
 
 #### Pre-requisites
+- [VS Code](https://code.visualstudio.com/) with the [recommended extensions](./.vscode/extensions.json) installed
+- [Node.js](https://nodejs.org/en/download/)
+- [Python 3.x](https://www.python.org/downloads/)
+- [Go](https://golang.org/doc/install)
+- [Dapr](https://docs.dapr.io/getting-started/install-dapr-cli/)
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli)
+- [Azure Container Apps CLI extension](https://github.com/microsoft/azure-container-apps)
 
-The following is needed to run this sample:
-- [Docker Desktop](https://www.docker.com/get-started)
+1. Fork the sample repo
+2. Clone the repo: `git clone https://github.com/{username}/container-apps-store-api-microservice`
+3. Open the cloned repo in VS Code
+4. Follow the prompt to install recommended extensions
+5. Select the debug **All Containers** and run the sample locally
+
+Any changes made to the project and checked into your GitHub repo will trigger a GitHub action to build and deploy
+
+### Option 4: Build and run manually
+
+#### Pre-requisites
 - [Node.js](https://nodejs.org/en/download/)
 - [Python 3.x](https://www.python.org/downloads/)
 - [Go](https://golang.org/doc/install)
@@ -78,7 +105,7 @@ The following is needed to run this sample:
 #### Steps
 
 1. Fork the sample repo
-2. Clone the repo: `git clone https://github.com/{username}/container-app-demo`
+2. Clone the repo: `git clone https://github.com/{username}/container-apps-store-api-microservice`
 3. Build the sample: 
 ```bash
 cd node-service

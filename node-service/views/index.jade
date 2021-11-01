@@ -17,3 +17,15 @@ block content
       input(type='text', name='item', placeholder='Widget', required='required')
     div.actions
       input(type='submit', value='Create')
+
+  br
+  br
+  h2= 'View order'
+  br
+  br
+  form(action='/order', method='get')
+    div.input
+      span.label Id
+      input(type='text', name='id', placeholder='foo', required='required')
+    div.actions
+      input(type='submit', value='View')

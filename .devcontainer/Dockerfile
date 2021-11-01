@@ -41,10 +41,10 @@ RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh
 ENV PATH="${PATH}:/home/${USERNAME}/.dapr/bin"
 
 # Switch state store to orders
-RUN sed -i 's/statestore/orders/g' ${HOME}/.dapr/components/statestore.yaml
+RUN sed -i 's/statestore/orders/g' $/home/${USERNAME}/.dapr/components/statestore.yaml
 
 # Install Tye
-ENV PATH=$HOME/.dotnet/tools:$PATH
+ENV PATH=/home/${USERNAME}/.dotnet/tools:$PATH
 
 # Setting the ENTRYPOINT to docker-init.sh will configure non-root access 
 # to the Docker socket. The script will also execute CMD as needed.

@@ -1,7 +1,7 @@
 # [Choice] .NET version: 5.0, 3.1, 2.1
 ARG VARIANT=3.1
 FROM mcr.microsoft.com/vscode/devcontainers/dotnet:0-${VARIANT}
-RUN dotnet tool install -g Microsoft.Tye --version "0.10.0-alpha.21420.1"
+RUN su vscode -c "umask 0002 && dotnet tool install -g Microsoft.Tye --version \"0.10.0-alpha.21420.1\" 2>&1"
 
 # [Choice] Go version
 ARG GO_VERSION="1.17"
@@ -39,9 +39,6 @@ RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh
 
 # Add daprd to the path for the VS Code Dapr extension.
 ENV PATH="${PATH}:/home/${USERNAME}/.dapr/bin"
-
-# Switch state store to orders
-RUN sed -i 's/statestore/orders/g' $/home/${USERNAME}/.dapr/components/statestore.yaml
 
 # Install Tye
 ENV PATH=/home/${USERNAME}/.dotnet/tools:$PATH

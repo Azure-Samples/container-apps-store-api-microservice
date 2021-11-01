@@ -29,3 +29,15 @@ block content
       input(type='text', name='id', placeholder='foo', required='required')
     div.actions
       input(type='submit', value='View')
+
+  br
+  br
+  h2= 'View inventory status'
+  br
+  br
+  form(action='/inventory', method='get')
+    div.input
+      span.label Id
+      input(type='text', name='id', placeholder='foo', required='required')
+    div.actions
+      input(type='submit', value='View')

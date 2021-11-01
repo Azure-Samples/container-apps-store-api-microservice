@@ -6,7 +6,6 @@ const daprPort = process.env.DAPR_HTTP_PORT || 3500;
 
 //use dapr http proxy (header) to call orders service with normal /order route URL in axios.get call
 const daprSidecar = `http://localhost:${daprPort}`
-//const daprSidecar = `http://localhost:${daprPort}/v1.0/invoke/${orderService}/method`
 
 /* GET order by calling order microservice via dapr */
 router.get('/', async function(req, res, next) {
@@ -15,6 +14,7 @@ router.get('/', async function(req, res, next) {
     headers: {'dapr-app-id': `${orderService}`} //sets app name for service discovery
   });
   
+  res.setHeader('Content-Type', 'application/json');
   res.send(`${JSON.stringify(data.data)}`);
 });
 

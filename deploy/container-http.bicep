@@ -19,7 +19,7 @@ param secrets array = [
   'multiple'
   'single'
 ])
-param revisionMode string = 'single'
+param revisionMode string = 'multiple'
 
 @secure()
 param containerRegistryPassword string
@@ -70,7 +70,7 @@ resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
         }
       ]
       scale: {
-        minReplicas: 1
+      //  minReplicas: 1
       //  maxReplicas: 10
       //   rules: [{
       //     name: 'httpscale'

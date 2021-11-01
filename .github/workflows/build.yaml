@@ -93,10 +93,10 @@ jobs:
                 isNodeExternalIngress=true \
                 pythonImage='${{ needs.build.outputs.containerImage-python }}' \
                 pythonPort=5000 \
-                isPythonExternalIngress=true \
+                isPythonExternalIngress=false \
                 goImage='${{ needs.build.outputs.containerImage-go }}' \
                 goPort=8050 \
-                isGoExternalIngress=true \
+                isGoExternalIngress=false \
                 containerRegistry=${{ env.REGISTRY }} \
                 containerRegistryUsername=${{ github.actor }} \
                 containerRegistryPassword=${{ secrets.PACKAGES_TOKEN }}

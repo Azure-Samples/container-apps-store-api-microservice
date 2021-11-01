@@ -15,6 +15,8 @@ IMPORTANT: In general, each microservice should have an independent release and 
 
 ## Deploy and Run
 
+### Deploy via GitHub Actions (recommended)
+
 1. Fork the sample repo
 2. Create the following required [encrypted secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment) for the sample
 
@@ -29,6 +31,31 @@ IMPORTANT: In general, each microservice should have an independent release and 
     This will start the GitHub Actions which will build the code, publish them to your GitHub repository as private container images, create an Azure Container App environment, a Cosmos DB database, and Container Apps for each of the microservices.
 4. Once the GitHub Actions have completed successfully, navigate to the [Azure Portal](https://portal.azure.com) and select the resource group you created.  Open the `node-app` container, and browse to the URL.  You should see the sample application running.  You can go through the UX to create an order through the order microservice, and then navigate to the `/orders?id=foo` endpoint and `/inventory?id=foo` to get the status via other microservices.  
 5. After calling each microservice, you can open the application insights resource created and select the **Application Map**, you should see a visualization of your calls between Container Apps (note: it may take a few minutes for the app insights data to ingest and process into the app map view).
+
+### Deploy via Azure Bicep
+
+You can also deploy the solution at anytime using the Azure CLI.
+
+1. Clone the repo and navigate to the folder
+2. Run the following CLI command (with appropiate values for $variables)
+  ```cli
+  az group create -n $resourceGroup -l northcentralus
+  az deployment group create -g $resourceGroup -f ./deploy/main.bicep \
+    -p \
+      nodeImage='ghcr.io/azure-samples/container-apps-store-api-microservice/node-service:main' \
+      nodePort=3000 \
+      isNodeExternalIngress=true \
+      pythonImage='ghcr.io/azure-samples/container-apps-store-api-microservice/python-service:main' \
+      pythonPort=5000 \
+      isPythonExternalIngress=false \
+      goImage='ghcr.io/azure-samples/container-apps-store-api-microservice/go-service:main' \
+      goPort=8050 \
+      isGoExternalIngress=false \
+      containerRegistry=ghcr.io \
+      containerRegistryUsername=$username \
+      containerRegistryPassword=$GitHubPackagesToken
+  ```
+3. Continue with Step #4 in the GitHub Actions flow above to test your solution
 
 ## Solution Overview
 

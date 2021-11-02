@@ -8,7 +8,6 @@ services:
         variant: 3.1
 
     environment:
-      ASPNETCORE_Kestrel__Endpoints__Http__Url: http://*:5000
       DAPR_NETWORK: dapr-dev-container
       ORDER_SERVICE_NAME: python-app
 

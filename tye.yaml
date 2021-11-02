@@ -26,9 +26,8 @@ services:
   - protocol: http
 - name: inventory
   executable: dapr  # path to an executable (relative to this file)
-  args: run --app-id go-service --app-port 8050 --dapr-http-port 3501 -- go run . # arguments to pass to the process
+  args: run --app-id go-service --app-port %PORT% --dapr-http-port 3501 -- go run . # arguments to pass to the process
   workingDirectory: ./go-service/
   bindings: # optional array of bindings (ports, connection strings)
-    - port: 8050 # number port of the binding
-      protocol: http
+    - protocol: http
   

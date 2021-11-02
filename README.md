@@ -43,13 +43,13 @@ You can also deploy the solution at anytime using the Azure CLI.
   az deployment group create -g $resourceGroup -f ./deploy/main.bicep \
     -p \
       minReplicas=0 \
-      nodeImage='ghcr.io/azure-samples/container-apps-store-api-microservice/node-service:main' \
+      nodeImage='ghcr.io/jeffhollan/container-apps-store-api-microservice/node-service:main' \
       nodePort=3000 \
       isNodeExternalIngress=true \
-      pythonImage='ghcr.io/azure-samples/container-apps-store-api-microservice/python-service:main' \
+      pythonImage='ghcr.io/jeffhollan/container-apps-store-api-microservice/python-service:main' \
       pythonPort=5000 \
       isPythonExternalIngress=false \
-      goImage='ghcr.io/azure-samples/container-apps-store-api-microservice/go-service:main' \
+      goImage='ghcr.io/jeffhollan/container-apps-store-api-microservice/go-service:main' \
       goPort=8050 \
       isGoExternalIngress=false \
       containerRegistry=ghcr.io \

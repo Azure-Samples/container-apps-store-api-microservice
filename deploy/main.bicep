@@ -26,6 +26,7 @@ module environment 'environment.bicep' = {
   name: 'container-app-environment'
   params: {
     environmentName: environmentName
+    location: location
   }
 }
 
@@ -33,7 +34,8 @@ module environment 'environment.bicep' = {
 module cosmosdb 'cosmosdb.bicep' = {
   name: 'cosmosdb'
   params: {
-    
+    location: location
+    primaryRegion: location
   }
 }
 
@@ -44,6 +46,7 @@ module apim 'api-management.bicep' = {
     apimName: apimName
     publisherName: 'Contoso Store'
     publisherEmail: 'demo@example.com'
+    apimLocation: location
   }
 }
 
@@ -51,6 +54,7 @@ module apim 'api-management.bicep' = {
 module pythonService 'container-http.bicep' = {
   name: pythonServiceAppName
   params: {
+    location: location
     containerAppName: pythonServiceAppName
     environmentId: environment.outputs.environmentId
     containerImage: pythonImage
@@ -103,6 +107,7 @@ module pythonService 'container-http.bicep' = {
 module goService 'container-http.bicep' = {
   name: goServiceAppName
   params: {
+    location: location
     containerAppName: goServiceAppName
     environmentId: environment.outputs.environmentId
     containerImage: goImage
@@ -120,6 +125,7 @@ module goService 'container-http.bicep' = {
 module nodeService 'container-http.bicep' = {
   name: nodeServiceAppName
   params: {
+    location: location
     containerAppName: nodeServiceAppName
     environmentId: environment.outputs.environmentId
     containerImage: nodeImage

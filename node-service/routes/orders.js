@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const axios = require('axios').default;
-const orderService = process.env.ORDER_SERVICE_NAME || 'python-service';
+const orderService = process.env.ORDER_SERVICE_NAME || 'python-app';
 const daprPort = process.env.DAPR_HTTP_PORT || 3500;
 
 //use dapr http proxy (header) to call orders service with normal /order route URL in axios.get call

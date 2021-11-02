@@ -1,5 +1,5 @@
 param apimName string
-param apimLocation string
+param apimLocation string = resourceGroup().location
 param publisherName string
 param publisherEmail string
 @description('The pricing tier of this API Management service')

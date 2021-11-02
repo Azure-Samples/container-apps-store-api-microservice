@@ -12,7 +12,7 @@ name: Store-API # application name
 services:
 - name: store-api
   executable: dapr  # path to an executable (relative to this file)
-  args: run --app-id node-service --app-port 3000 --dapr-http-port 3502 --components-path ./components -- npm run start # arguments to pass to the process
+  args: run --app-id node-app --app-port 3000 --dapr-http-port 3502 --components-path ./components -- npm run start # arguments to pass to the process
   # replicas: 5 # number of times to launch the application
   workingDirectory: ./node-service/
   bindings: # optional array of bindings (ports, connection strings)
@@ -20,7 +20,7 @@ services:
     protocol: http
 - name: order
   executable: dapr  # path to an executable (relative to this file)
-  args: run --app-id python-service --app-port 8051 --dapr-http-port 3500 --components-path . -- python3 app.py # arguments to pass to the process
+  args: run --app-id python-app --app-port 8051 --dapr-http-port 3500 --components-path . -- python3 app.py # arguments to pass to the process
   # replicas: 5 # number of times to launch the application
   workingDirectory: ./python-service/
   bindings: # optional array of bindings (ports, connection strings)
@@ -28,7 +28,7 @@ services:
     protocol: http
 - name: inventory
   executable: dapr  # path to an executable (relative to this file)
-  args: run --app-id go-service --app-port 8050 --dapr-http-port 3501 -- go run . # arguments to pass to the process
+  args: run --app-id go-app --app-port 8050 --dapr-http-port 3501 -- go run . # arguments to pass to the process
   workingDirectory: ./go-service/
   bindings: # optional array of bindings (ports, connection strings)
     - port: 8050 # number port of the binding

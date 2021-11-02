@@ -39,7 +39,7 @@ You can also deploy the solution at anytime using the Azure CLI.
 1. Clone the repo and navigate to the folder
 2. Run the following CLI command (with appropiate values for $variables)
   ```cli
-  az group create -n $resourceGroup -l northcentralus
+  az group create -n $resourceGroup -l canadacentral
   az deployment group create -g $resourceGroup -f ./deploy/main.bicep \
     -p \
       minReplicas=0 \
@@ -149,19 +149,19 @@ cd ..
 
 Dapr will be used to start microservices and enable APIs for things like service discovery, state management, and observability.  The code for `store-api` service invokes other services at the localhost:daprport host address, and sets the `dapr-app-id` HTTP header to enable service discovery using an HTTP proxy feature. 
 
-Run the `node-service` (store-api) service in a new terminal window:
+Run the `node-app` (store-api) service in a new terminal window:
 ```bash
-dapr run --app-id node-service --app-port 3000 --dapr-http-port 3501 --components-path ./components -- npm run start
+dapr run --app-id node-app --app-port 3000 --dapr-http-port 3501 --components-path ./components -- npm run start
 ```
 
-Run the `python-service` (order) service in a new terminal window:
+Run the `python-app` (order) service in a new terminal window:
 ```bash
-dapr run --app-id python-service --app-port 5000 --dapr-http-port 3500 --components-path . -- python3 app.py
+dapr run --app-id python-app --app-port 5000 --dapr-http-port 3500 --components-path . -- python3 app.py
 ```
 
-Run the `go-service` (inventory) service in a new terminal window:
+Run the `go-app` (inventory) service in a new terminal window:
 ```bash
-dapr run --app-id go-service --app-port 8050 --dapr-http-port 3502 -- go run .
+dapr run --app-id go-app --app-port 8050 --dapr-http-port 3502 -- go run .
 ```
 
 `State management`: orders app calls the Dapr State Store APIs which are bound to a Redis container that is preinstalled with Dapr.  When the application is later deployed to Azure Container Apps, the component config yaml will be modified to point to an Azure CosmosDb instance.  No code changes will be needed since the Dapr State Store API is completely portable.  

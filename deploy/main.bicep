@@ -1,4 +1,4 @@
-param location string = 'northcentralusstage'
+param location string = resourceGroup().location
 param environmentName string = 'env-${uniqueString(resourceGroup().id)}'
 param apimName string = 'store-api-mgmt-${uniqueString(resourceGroup().id)}'
 param minReplicas int = 0
@@ -42,7 +42,6 @@ module apim 'api-management.bicep' = {
   name: 'apim'
   params: {
     apimName: apimName
-    apimLocation: 'northcentralus'
     publisherName: 'Contoso Store'
     publisherEmail: 'demo@example.com'
   }
@@ -53,7 +52,6 @@ module pythonService 'container-http.bicep' = {
   name: pythonServiceAppName
   params: {
     containerAppName: pythonServiceAppName
-    location: 'northcentralusstage'
     environmentId: environment.outputs.environmentId
     containerImage: pythonImage
     containerPort: pythonPort
@@ -106,7 +104,6 @@ module goService 'container-http.bicep' = {
   name: goServiceAppName
   params: {
     containerAppName: goServiceAppName
-    location: 'northcentralusstage'
     environmentId: environment.outputs.environmentId
     containerImage: goImage
     containerPort: goPort
@@ -124,7 +121,6 @@ module nodeService 'container-http.bicep' = {
   name: nodeServiceAppName
   params: {
     containerAppName: nodeServiceAppName
-    location: 'northcentralusstage'
     environmentId: environment.outputs.environmentId
     containerImage: nodeImage
     containerPort: nodePort

@@ -71,21 +71,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         
-      # - name: Azure Login
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy bicep
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az extension add -y --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.1.6-py2.py3-none-any.whl
-            az cloud register -n CloudWithCustomEndpoint --endpoint-active-directory https://login.microsoftonline.com/ --endpoint-active-directory-graph-resource-id https://graph.windows.net/ --endpoint-gallery https://gallery.azure.com --endpoint-management https://management.core.windows.net --endpoint-resource-manager https://brazilus.management.azure.com --suffix-storage-endpoint core.windows.net  
-            az cloud set --name CloudWithCustomEndpoint
-            az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT }}
-            az provider register --namespace Microsoft.Web 
-            az group create -g ${{ secrets.RESOURCE_GROUP }} -l northcentralus
+            az group create -g ${{ secrets.RESOURCE_GROUP }} -l canadacentral
             az deployment group create -g ${{ secrets.RESOURCE_GROUP }} -f ./deploy/main.bicep \
              -p \
                 minReplicas=0 \

@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const axios = require('axios').default;
-const inventoryService = process.env.INVENTORY_SERVICE_NAME || 'go-service';
+const inventoryService = process.env.INVENTORY_SERVICE_NAME || 'go-app';
 const daprPort = process.env.DAPR_HTTP_PORT || 3500;
 
 //use dapr http proxy (header) to call inventory service with normal /inventory route URL in axios.get call

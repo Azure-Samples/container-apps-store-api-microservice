@@ -2,36 +2,28 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.205.0/containers/dapr-dotnet
 {
 	"name": "container-app-demo",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "app",
-	"workspaceFolder": "/workspace",
-
-	// Use this environment variable if you need to bind mount your local source code into a new container.
-	"remoteEnv": {
-		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
-		"PATH": "/home/vscode/.dapr/bin/:/home/vscode/.dotnet/tools:$PATH${containerEnv:PATH}",
-		"INVENTORY_SERVICE_NAME": "go-app",
-		"ORDER_SERVICE_NAME": "python-app"
-	},
-	
-	// Set *default* container specific settings.json values on container create.
-	"settings": {},
-
-	// Add the IDs of extensions you want installed when the container is created.
+	"dockerFile": "Dockerfile",
 	"extensions": [
-		"ms-azuretools.vscode-dapr",
-		"ms-azuretools.vscode-docker",
-		"golang.go",
-		"ms-azuretools.vscode-bicep",
-		"ms-python.python"
+	  "golang.go",
+	  "ms-azuretools.vscode-dapr",
+	  "ms-azuretools.vscode-docker",
+	  "ms-kubernetes-tools.vscode-kubernetes-tools"
 	],
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Ensure Dapr is running on opening the container
-	"postCreateCommand": "dapr uninstall --all && dapr init && sed -i 's/statestore/orders/g' ${HOME}/.dapr/components/statestore.yaml",
-
-	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode"
+	"mounts": [
+	  // Mount docker-in-docker library volume
+	  "source=codespaces-linux-var-lib-docker,target=/var/lib/docker,type=volume"
+	],
+	// Always run image-defined docker-init.sh to enable docker-in-docker
+	"overrideCommand": false,
+	"remoteUser": "codespace",
+	"runArgs": [
+	  // Enable ptrace-based debugging for Go in container
+	  "--cap-add=SYS_PTRACE",
+	  "--security-opt",
+	  "seccomp=unconfined",
+  
+	  // Enable docker-in-docker configuration
+	  "--init",
+	  "--privileged"
+	],
 }

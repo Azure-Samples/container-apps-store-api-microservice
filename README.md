@@ -83,8 +83,11 @@ The [`go-app`](./go-service) is a Go mux app that will retrieve and store the st
 ### Option 1: Build and run with GitHub Codespaces (recommended)
 
 #### Pre-requisites
-- A GitHub account with access to [GitHub Codespaces](https://github.com/features/codespaces)
+- A GitHub account with access to [GitHub Codespaces](https://github.com/features/codespaces)  
 
+#### Steps
+1. Select **Code** and open in Codespace from GitHub
+2. After the codespaces has initialized, select to debug and run **All Containers** to run the sample locally
 
 ### Option 2: Build and run with VS Code Dev Containers
 

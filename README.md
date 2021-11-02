@@ -8,8 +8,13 @@ IMPORTANT: In general, each microservice should have an independent release and 
 
 - [Deploy](#deploy)
 - [Solution Overview](#solution-overview)
-- [Build and run](#build-and-run)
+- [Build and run](#build-and-run)  
+<br/>
 
+### Demo 
+[<img src="./assets/thumbnail.png" alt="Demo video" width="400">](https://youtu.be/fmGHEJL81rU)
+
+<br/>
 
 ### Github Actions Secrets
 

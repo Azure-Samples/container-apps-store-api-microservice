@@ -71,7 +71,7 @@ The [`node-app`](./node-service) is an express.js API that exposes three endpoin
 The [`python-app`](./python-service) is a Python flask app that will retrieve and store the state of orders.  It uses [Dapr state management](https://docs.dapr.io/developing-applications/building-blocks/state-management/state-management-overview/) to store the state of the orders.  When deployed in Container Apps, Dapr is configured to point to an Azure Cosmos DB to back the state. 
 
 #### Inventory Service (`go-app`)
-The ['go-app'](./go-service) is a Go mux app that will retrieve and store the state of inventory.  For this sample, the mux app just returns back a static value.
+The [`go-ap`](./go-service) is a Go mux app that will retrieve and store the state of inventory.  For this sample, the mux app just returns back a static value.
 
 ## Build and Run
 

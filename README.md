@@ -23,7 +23,7 @@ IMPORTANT: In general, each microservice should have an independent release and 
 ### Deploy via GitHub Actions (recommended)
 
 1. Fork the sample repo
-2. Create the following required [encrypted secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment) for the sample
+2. Create the following required [encrypted secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) for the sample
 
   | Name | Value |
   | ---- | ----- |

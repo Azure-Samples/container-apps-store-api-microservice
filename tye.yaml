@@ -8,6 +8,14 @@
 name: Store-API # application name
 # registry: exampleuser # dockerhub username or container registry hostname
 
+ingress:
+- name: ingress
+  bindings:
+    - port: 8080
+  rules:
+    - path: /
+      service: store-api
+
 # define multiple services here
 services:
 - name: store-api

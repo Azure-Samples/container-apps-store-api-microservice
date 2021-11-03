@@ -7,6 +7,6 @@ spec:
   version: v1
   metadata:
   - name: redisHost
-    value: dapr_redis_dapr-dev-container:6379
+    value: localhost:6379
   - name: redisPassword
     value: ""

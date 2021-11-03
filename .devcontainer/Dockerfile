@@ -22,16 +22,22 @@ RUN if [ "$INSTALL_AZURE_CLI" = "true" ]; then bash /tmp/library-scripts/azcli-d
 ARG ENABLE_NONROOT_DOCKER="true"
 # [Option] Use the OSS Moby CLI instead of the licensed Docker CLI
 ARG USE_MOBY="true"
+# [Option] Engine/CLI Version
+ARG DOCKER_VERSION="latest"
+
+# Enable new "BUILDKIT" mode for Docker CLI
+ENV DOCKER_BUILDKIT=1
 
 ARG USERNAME=vscode
 
 # Install needed packages and setup non-root user. Use a separate RUN statement to add your
 # own dependencies. A user of "automatic" attempts to reuse an user ID if one already exists.
-COPY library-scripts/docker-debian.sh /tmp/library-scripts/
+COPY library-scripts/docker-in-docker-debian.sh /tmp/library-scripts/
 RUN apt-get update \
     && apt-get install python3-pip -y \
-    && /bin/bash /tmp/library-scripts/docker-debian.sh "${ENABLE_NONROOT_DOCKER}" "/var/run/docker-host.sock" "/var/run/docker.sock" "${USERNAME}" "${USE_MOBY}"
 # Use Docker script from script library to set things up
+    && /bin/bash /tmp/library-scripts/docker-in-docker-debian.sh "${ENABLE_NONROOT_DOCKER}" "${USERNAME}" "${USE_MOBY}" "${DOCKER_VERSION}"
+
 # Install Dapr
 RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash \
     # Clean up
@@ -42,6 +48,8 @@ ENV PATH="${PATH}:/home/${USERNAME}/.dapr/bin"
 
 # Install Tye
 ENV PATH=/home/${USERNAME}/.dotnet/tools:$PATH
+
+VOLUME [ "/var/lib/docker" ]
 
 # Setting the ENTRYPOINT to docker-init.sh will configure non-root access 
 # to the Docker socket. The script will also execute CMD as needed.

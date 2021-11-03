@@ -2,9 +2,10 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.205.0/containers/dapr-dotnet
 {
 	"name": "container-app-demo",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "app",
-	"workspaceFolder": "/workspace",
+	"dockerFile": "Dockerfile",
+	"runArgs": ["--init", "--privileged"],
+	"mounts": ["source=dind-var-lib-docker,target=/var/lib/docker,type=volume"],
+	"overrideCommand": false,
 
 	// Use this environment variable if you need to bind mount your local source code into a new container.
 	"remoteEnv": {

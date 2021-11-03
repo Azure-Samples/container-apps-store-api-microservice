@@ -71,7 +71,7 @@ resource storeAPI 'Microsoft.ApiManagement/service/apis@2020-12-01' = {
 //attach API to product(s)
 resource attachAPIToProducts 'Microsoft.ApiManagement/service/products/apis@2020-12-01' = [for (product, i) in productsSet: {
   parent: ProductRecords[i]
-  name: apiName
+  name: storeAPI.name
 }]
 
 output apimProducts array = [for (name, i) in productsSet: {

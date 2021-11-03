@@ -21,10 +21,9 @@ jobs:
       contents: read
       packages: write
     outputs:
-      containerImage-node: ${{ steps.image-digest.outputs.digest-node-service }}
-      containerImage-python: ${{ steps.image-digest.outputs.digest-python-service }}
-      containerImage-go: ${{ steps.image-digest.outputs.digest-go-service }}
-      containerTag: ${{ fromJson(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+      containerImage-node: ${{ steps.image-tag.outputs.image-node-service }}
+      containerImage-python: ${{ steps.image-tag.outputs.image-python-service }}
+      containerImage-go: ${{ steps.image-tag.outputs.image-go-service }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -46,7 +45,13 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}
-
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=ref,event=branch
+            type=sha
+  
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
@@ -56,36 +61,29 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Output digest
-        id: image-digest
-        run: echo "::set-output name=digest-${{ matrix.services.imageName }}::$(docker inspect ${{ fromJson(steps.meta.outputs.json).tags[0] }} | jq -r '.[].RepoDigests[0]')"
+      
+      - name: Output image tag
+        id: image-tag
+        run: echo "::set-output name=image-${{ matrix.services.imageName }}::${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}:sha-$(git rev-parse --short HEAD)" | tr '[:upper:]' '[:lower:]'
   
   deploy:
     runs-on: ubuntu-latest
     needs: [build]
-    permissions:
-      contents: read
-      packages: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         
-      # - name: Azure Login
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy bicep
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.29.2
           inlineScript: |
-            az extension add -y --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.1.6-py2.py3-none-any.whl
-            az cloud register -n CloudWithCustomEndpoint --endpoint-active-directory https://login.microsoftonline.com/ --endpoint-active-directory-graph-resource-id https://graph.windows.net/ --endpoint-gallery https://gallery.azure.com --endpoint-management https://management.core.windows.net --endpoint-resource-manager https://brazilus.management.azure.com --suffix-storage-endpoint core.windows.net  
-            az cloud set --name CloudWithCustomEndpoint
-            az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT }}
-            az provider register --namespace Microsoft.Web 
-            az group create -g ${{ secrets.RESOURCE_GROUP }} -l northcentralus
+            az group create -g ${{ secrets.RESOURCE_GROUP }} -l canadacentral
             az deployment group create -g ${{ secrets.RESOURCE_GROUP }} -f ./deploy/main.bicep \
              -p \
                 minReplicas=0 \

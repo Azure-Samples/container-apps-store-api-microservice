@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const axios = require('axios').default;
-const orderService = process.env.ORDER_SERVICE_NAME || 'python-service';
+const orderService = process.env.ORDER_SERVICE_NAME || 'python-app';
 const daprPort = process.env.DAPR_HTTP_PORT || 3500;
 
 //use dapr http proxy (header) to call orders service with normal /order route URL in axios.get call
@@ -10,6 +10,7 @@ const daprSidecar = `http://localhost:${daprPort}`
 /* GET order by calling order microservice via dapr */
 router.get('/', async function(req, res, next) {
 
+  console.log('Service invoke to: ' + `${daprSidecar}/order?id=${req.query.id}`);
   var data = await axios.get(`${daprSidecar}/order?id=${req.query.id}`, {
     headers: {'dapr-app-id': `${orderService}`} //sets app name for service discovery
   });
@@ -24,6 +25,7 @@ router.post('/', async function(req, res, next) {
     var order = req.body;
     order['location'] = 'Seattle';
     order['priority'] = 'Standard';
+    console.log('Service invoke POST to: ' + `${daprSidecar}/order?id=${req.query.id}` + ', with data: ' +  JSON.stringify(order));
     var data = await axios.post(`${daprSidecar}/order?id=${req.query.id}`, order, {
       headers: {'dapr-app-id': `${orderService}`} //sets app name for service discovery
     });

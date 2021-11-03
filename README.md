@@ -8,8 +8,13 @@ IMPORTANT: In general, each microservice should have an independent release and 
 
 - [Deploy](#deploy)
 - [Solution Overview](#solution-overview)
-- [Build and run](#build-and-run)
+- [Build and run](#build-and-run)  
+<br/>
 
+### Demo 
+[<img src="./assets/thumbnail.png" alt="Demo video" width="400">](https://youtu.be/fmGHEJL81rU)
+
+<br/>
 
 ### Github Actions Secrets
 
@@ -39,17 +44,17 @@ You can also deploy the solution at anytime using the Azure CLI.
 1. Clone the repo and navigate to the folder
 2. Run the following CLI command (with appropiate values for $variables)
   ```cli
-  az group create -n $resourceGroup -l northcentralus
+  az group create -n $resourceGroup -l canadacentral
   az deployment group create -g $resourceGroup -f ./deploy/main.bicep \
     -p \
       minReplicas=0 \
-      nodeImage='ghcr.io/azure-samples/container-apps-store-api-microservice/node-service:main' \
+      nodeImage='ghcr.io/jeffhollan/container-apps-store-api-microservice/node-service:main' \
       nodePort=3000 \
       isNodeExternalIngress=true \
-      pythonImage='ghcr.io/azure-samples/container-apps-store-api-microservice/python-service:main' \
+      pythonImage='ghcr.io/jeffhollan/container-apps-store-api-microservice/python-service:main' \
       pythonPort=5000 \
       isPythonExternalIngress=false \
-      goImage='ghcr.io/azure-samples/container-apps-store-api-microservice/go-service:main' \
+      goImage='ghcr.io/jeffhollan/container-apps-store-api-microservice/go-service:main' \
       goPort=8050 \
       isGoExternalIngress=false \
       containerRegistry=ghcr.io \
@@ -64,14 +69,14 @@ You can also deploy the solution at anytime using the Azure CLI.
 
 There are three main microservices in the solution.  
 
-#### Store API (`node-service`)
-The [`node-service`](./node-service) is an express.js API that exposes three endpoints.  `/` will return the primary index page, `/order` will return details on an order (retrieved from the **order service**), and `/inventory` will return details on an inventory item (retrieved from the **inventory service**).
+#### Store API (`node-app`)
+The [`node-app`](./node-service) is an express.js API that exposes three endpoints.  `/` will return the primary index page, `/order` will return details on an order (retrieved from the **order service**), and `/inventory` will return details on an inventory item (retrieved from the **inventory service**).
 
-#### Order Service (`python-service`)
-The [`python-service`](./python-service) is a Python flask app that will retrieve and store the state of orders.  It uses [Dapr state management](https://docs.dapr.io/developing-applications/building-blocks/state-management/state-management-overview/) to store the state of the orders.  When deployed in Container Apps, Dapr is configured to point to an Azure Cosmos DB to back the state. 
+#### Order Service (`python-app`)
+The [`python-app`](./python-service) is a Python flask app that will retrieve and store the state of orders.  It uses [Dapr state management](https://docs.dapr.io/developing-applications/building-blocks/state-management/state-management-overview/) to store the state of the orders.  When deployed in Container Apps, Dapr is configured to point to an Azure Cosmos DB to back the state. 
 
-#### Inventory Service (`go-service`)
-The ['go-service'](./go-service) is a Go mux app that will retrieve and store the state of inventory.  For this sample, the mux app just returns back a static value.
+#### Inventory Service (`go-app`)
+The [`go-app`](./go-service) is a Go mux app that will retrieve and store the state of inventory.  For this sample, the mux app just returns back a static value.
 
 ## Build and Run
 
@@ -83,8 +88,11 @@ The ['go-service'](./go-service) is a Go mux app that will retrieve and store th
 ### Option 1: Build and run with GitHub Codespaces (recommended)
 
 #### Pre-requisites
-- A GitHub account with access to [GitHub Codespaces](https://github.com/features/codespaces)
+- A GitHub account with access to [GitHub Codespaces](https://github.com/features/codespaces)  
 
+#### Steps
+1. Select **Code** and open in Codespace from GitHub
+2. After the codespaces has initialized, select to debug and run **All Containers** to run the sample locally
 
 ### Option 2: Build and run with VS Code Dev Containers
 
@@ -142,28 +150,29 @@ cd ../go-service
 go install
 cd ../python-service
 pip install -r requirements.txt
+cd ..
 ```
 4. Run the sample
 ##### Local run and debug
 
 Dapr will be used to start microservices and enable APIs for things like service discovery, state management, and observability.  The code for `store-api` service invokes other services at the localhost:daprport host address, and sets the `dapr-app-id` HTTP header to enable service discovery using an HTTP proxy feature. 
 
-Run the `node-service` (store-api) service in a new terminal window:
+Run the `node-app` (store-api) service in a new terminal window:
 ```bash
-dapr run --app-id node-service --app-port 3000 --dapr-http-port 3501 --components-path ./components -- npm run start
+dapr run --app-id node-app --app-port 3000 --dapr-http-port 3501 --components-path ./components -- npm run start
 ```
 
-Run the `python-service` (order) service in a new terminal window:
+Run the `python-app` (order) service in a new terminal window:
 ```bash
-dapr run --app-id python-service --app-port 5000 --dapr-http-port 3500 --components-path . -- python3 app.py
+dapr run --app-id python-app --app-port 5000 --dapr-http-port 3500 --components-path . -- python3 app.py
 ```
 
-Run the `go-service` (inventory) service in a new terminal window:
+Run the `go-app` (inventory) service in a new terminal window:
 ```bash
-dapr run --app-id go-service --app-port 8050 --dapr-http-port 3502 -- go run .
+dapr run --app-id go-app --app-port 8050 --dapr-http-port 3502 -- go run .
 ```
 
-`State reliability`: orders app is configured to bind the Dapr State Store APIs to a local instance of Redis that is preinstalled with Dapr.  When the application is later deployed to Azure Container Apps, the component config yaml will be modified to point to an Azure CosmosDb instance.  No code changes will be needed since the Dapr State Store API is completely portable.  
+`State management`: orders app calls the Dapr State Store APIs which are bound to a Redis container that is preinstalled with Dapr.  When the application is later deployed to Azure Container Apps, the component config yaml will be modified to point to an Azure CosmosDb instance.  No code changes will be needed since the Dapr State Store API is completely portable.  
 
 `Observability`: distributed tracing is enabled by default on (http://localhost:9411/).  Browse to this URL to inspect any distributed trace or to inspect dependencies in real time.  When the application is deployed to Azure we recommend modifying the component config YAML to enable [Open Telemetry and Application Insights](https://docs.dapr.io/operations/monitoring/tracing/open-telemetry-collector-appinsights/). 
 

@@ -81,7 +81,6 @@ jobs:
       - name: Deploy bicep
         uses: azure/CLI@v1
         with:
-          azcliversion: 2.29.2
           inlineScript: |
             az group create -g ${{ secrets.RESOURCE_GROUP }} -l canadacentral
             az deployment group create -g ${{ secrets.RESOURCE_GROUP }} -f ./deploy/main.bicep \

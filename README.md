@@ -65,7 +65,7 @@ You can also deploy the solution at anytime using the Azure CLI.
 
 ## Solution Overview
 
-![image of architecture](./assets/arch.png)  
+![image of architecture](./assets/arch.png)
 
 There are three main microservices in the solution.  
 

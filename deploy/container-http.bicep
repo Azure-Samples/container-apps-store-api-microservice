@@ -7,7 +7,6 @@ param isExternalIngress bool
 param containerRegistry string
 param containerRegistryUsername string
 param env array = []
-param daprComponents array = []
 param minReplicas int = 0
 param secrets array = [
   {
@@ -29,12 +28,11 @@ var cpu = json('0.5')
 var memory = '500Mi'
 var registrySecretRefName = 'docker-password'
 
-resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
+resource containerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
   name: containerAppName
-  kind: 'containerapp'
   location: location
   properties: {
-    kubeEnvironmentId: environmentId
+    managedEnvironmentId: environmentId
     configuration: {
       // activeRevisionsMode: revisionMode
       secrets: secrets
@@ -55,6 +53,11 @@ resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
         //     latestRevision: true
         //   }
         // ]
+      }
+      dapr: {
+        enabled: true
+        appPort: containerPort
+        appId: containerAppName
       }
     }
     template: {
@@ -82,12 +85,6 @@ resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
       //     }
       //   }
       //   ]
-      }
-      dapr: {
-        enabled: true
-        appPort: containerPort
-        appId: containerAppName
-        components: daprComponents
       }
     }
   }

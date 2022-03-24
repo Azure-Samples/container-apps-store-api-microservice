@@ -76,7 +76,7 @@ module pythonService 'container-http.bicep' = {
 resource stateDaprComponent 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
   name: '${environmentName}/orders'
   properties: {
-    type: 'state.azure.cosmosdb'
+    componentType: 'state.azure.cosmosdb'
     version: 'v1'
     secrets: [
       {

@@ -168,7 +168,7 @@ cd ..
 
 ##### Local run and debug
 
-Dapr will be used to start microservices and enable APIs for things like service discovery, state management, and observability. The code for `store-api` service invokes other services at the localhost:daprport host address, and sets the `dapr-app-id` HTTP header to enable service discovery using an HTTP proxy feature.
+Dapr will be used to start microservices and enable APIs for things like service discovery and state management. The code for `store-api` service invokes other services at the localhost:daprport host address, and sets the `dapr-app-id` HTTP header to enable service discovery using an HTTP proxy feature.
 
 Run the `node-app` (store-api) service in a new terminal window:
 
@@ -189,8 +189,6 @@ dapr run --app-id go-app --app-port 8050 --dapr-http-port 3502 -- go run .
 ```
 
 `State management`: orders app calls the Dapr State Store APIs which are bound to a Redis container that is preinstalled with Dapr. When the application is later deployed to Azure Container Apps, the component config yaml will be modified to point to an Azure CosmosDb instance. No code changes will be needed since the Dapr State Store API is completely portable.
-
-`Observability`: distributed tracing is enabled by default on (http://localhost:9411/). Browse to this URL to inspect any distributed trace or to inspect dependencies in real time. When the application is deployed to Azure we recommend modifying the component config YAML to enable [Open Telemetry and Application Insights](https://docs.dapr.io/operations/monitoring/tracing/open-telemetry-collector-appinsights/).
 
 ##### Local run and debug easily using Tye (optional)
 

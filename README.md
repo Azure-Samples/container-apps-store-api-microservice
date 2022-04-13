@@ -75,8 +75,8 @@ az deployment group create -g $RESOURCE_GROUP -f ./deploy/main.bicep \
     pythonPort=5000 \
     goImage='ghcr.io/jeffhollan/container-apps-store-api-microservice/go-service:main' \
     goPort=8050 \
-    isPrivateRegistry = false \
-    deployApim = true \
+    isPrivateRegistry=false \
+    deployApim=true \
     containerRegistry=ghcr.io
 ```
 

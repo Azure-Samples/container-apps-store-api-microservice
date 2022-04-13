@@ -2,10 +2,10 @@
 param accountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
 
 @description('Location for the Cosmos DB account.')
-param location string = resourceGroup().location
+param location string
 
 @description('The primary replica region for the Cosmos DB account.')
-param primaryRegion string = resourceGroup().location
+param primaryRegion string
 
 @description('The default consistency level of the Cosmos DB account.')
 @allowed([

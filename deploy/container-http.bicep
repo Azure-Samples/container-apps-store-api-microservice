@@ -1,59 +1,42 @@
 param containerAppName string
-param location string = resourceGroup().location
-param environmentId string
+param location string 
+param environmentName string 
 param containerImage string
 param containerPort int
 param isExternalIngress bool
 param containerRegistry string
 param containerRegistryUsername string
-param env array = []
+param isPrivateRegistry bool
+param enableIngress bool 
+param registryPassword string
 param minReplicas int = 0
-param secrets array = [
-  {
-    name: 'docker-password'
-    value: containerRegistryPassword
-  }
-]
+param secrets array = []
+param env array = []
 
-@allowed([
-  'multiple'
-  'single'
-])
-param revisionMode string = 'multiple'
 
-@secure()
-param containerRegistryPassword string
-
-var cpu = json('0.5')
-var memory = '500Mi'
-var registrySecretRefName = 'docker-password'
+resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' existing = {
+  name: environmentName
+}
 
 resource containerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
   name: containerAppName
   location: location
   properties: {
-    managedEnvironmentId: environmentId
+    managedEnvironmentId: environment.id
     configuration: {
-      // activeRevisionsMode: revisionMode
       secrets: secrets
-      registries: [
+      registries: isPrivateRegistry ? [
         {
           server: containerRegistry
           username: containerRegistryUsername
-          passwordSecretRef: registrySecretRefName
+          passwordSecretRef: registryPassword
         }
-      ]
-      ingress: {
+      ] : null
+      ingress: enableIngress ? {
         external: isExternalIngress
         targetPort: containerPort
         transport: 'auto'
-        // traffic: [
-        //   {
-        //     weight: 100
-        //     latestRevision: true
-        //   }
-        // ]
-      }
+      } : null
       dapr: {
         enabled: true
         appPort: containerPort
@@ -61,33 +44,19 @@ resource containerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
       }
     }
     template: {
-      // revisionSuffix: 'somevalue'
       containers: [
         {
           image: containerImage
           name: containerAppName
           env: env
-          // resources: {
-          //   cpu: cpu
-          //   memory: memory
-          // }
         }
       ]
       scale: {
         minReplicas: minReplicas
-      //  maxReplicas: 10
-      //   rules: [{
-      //     name: 'httpscale'
-      //     http: {
-      //       metadata: {
-      //         concurrentRequests: 100
-      //       }
-      //     }
-      //   }
-      //   ]
+        maxReplicas: 1
       }
     }
   }
 }
 
-output fqdn string = containerApp.properties.configuration.ingress.fqdn
+output fqdn string = enableIngress ? containerApp.properties.configuration.ingress.fqdn : 'Ingress not enabled'

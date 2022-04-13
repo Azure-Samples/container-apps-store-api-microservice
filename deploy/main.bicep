@@ -1,47 +1,54 @@
 param location string = resourceGroup().location
 param environmentName string = 'env-${uniqueString(resourceGroup().id)}'
-param apimName string = 'store-api-mgmt-${uniqueString(resourceGroup().id)}'
+
 param minReplicas int = 0
-param nodeImage string = 'nginx'
+
+param nodeImage string 
 param nodePort int = 3000
-param isNodeExternalIngress bool = true
-param pythonImage string = 'nginx'
-param pythonPort int = 5000
-param isPythonExternalIngress bool = false
-param goImage string = 'nginx'
-param goPort int = 8050
-param isGoExternalIngress bool = false
-param containerRegistry string
-param containerRegistryUsername string
-
-@secure()
-param containerRegistryPassword string
-
 var nodeServiceAppName = 'node-app'
+
+param pythonImage string
+param pythonPort int = 5000
 var pythonServiceAppName = 'python-app'
+
+param goImage string
+param goPort int = 8050
 var goServiceAppName = 'go-app'
 
-// // container app environment
+param apimName string = 'store-api-mgmt-${uniqueString(resourceGroup().id)}'
+param deployApim bool = true
+param isPrivateRegistry bool = true
+
+param containerRegistry string
+param containerRegistryUsername string = 'testUser'
+@secure()
+param containerRegistryPassword string = ''
+param registryPassword string = 'registry-password'
+
+
+// Container Apps Environment 
 module environment 'environment.bicep' = {
-  name: 'container-app-environment'
+  name: '${deployment().name}--environment'
   params: {
     environmentName: environmentName
     location: location
+    appInsightsName: '${environmentName}-ai'
+    logAnalyticsWorkspaceName: '${environmentName}-la'
   }
 }
 
-// create cosmosdb
+// Cosmosdb
 module cosmosdb 'cosmosdb.bicep' = {
-  name: 'cosmosdb'
+  name: '${deployment().name}--cosmosdb'
   params: {
     location: location
     primaryRegion: location
   }
 }
 
-// create api management
-module apim 'api-management.bicep' = {
-  name: 'apim'
+// API Management
+module apim 'api-management.bicep' = if (deployApim) {
+  name: '${deployment().name}--apim'
   params: {
     apimName: apimName
     publisherName: 'Contoso Store'
@@ -50,23 +57,30 @@ module apim 'api-management.bicep' = {
   }
 }
 
+
 // Python App
 module pythonService 'container-http.bicep' = {
-  name: pythonServiceAppName
+  name: '${deployment().name}--${pythonServiceAppName}'
+  dependsOn: [
+    environment
+  ]
   params: {
+    enableIngress: true
+    isExternalIngress: false
     location: location
+    environmentName: environmentName
     containerAppName: pythonServiceAppName
-    environmentId: environment.outputs.environmentId
     containerImage: pythonImage
     containerPort: pythonPort
-    isExternalIngress: isPythonExternalIngress
+    isPrivateRegistry: isPrivateRegistry 
     minReplicas: minReplicas
     containerRegistry: containerRegistry
+    registryPassword: registryPassword
     containerRegistryUsername: containerRegistryUsername
-    containerRegistryPassword: containerRegistryPassword
+
     secrets: [
       {
-        name: 'docker-password'
+        name: registryPassword
         value: containerRegistryPassword
       }
     ]
@@ -75,6 +89,9 @@ module pythonService 'container-http.bicep' = {
 
 resource stateDaprComponent 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
   name: '${environmentName}/orders'
+  dependsOn: [
+    environment
+  ]
   properties: {
     componentType: 'state.azure.cosmosdb'
     version: 'v1'
@@ -103,43 +120,59 @@ resource stateDaprComponent 'Microsoft.App/managedEnvironments/daprComponents@20
       }
     ]
     scopes: [
-      pythonService.name
+      pythonServiceAppName
     ]
   }
 }
 
 // Go App
 module goService 'container-http.bicep' = {
-  name: goServiceAppName
+  name: '${deployment().name}--${goServiceAppName}'
+  dependsOn: [
+    environment
+  ]
   params: {
+    enableIngress: true
+    isExternalIngress: false
     location: location
+    environmentName: environmentName
     containerAppName: goServiceAppName
-    environmentId: environment.outputs.environmentId
     containerImage: goImage
     containerPort: goPort
-    isExternalIngress: isGoExternalIngress
+    isPrivateRegistry: isPrivateRegistry
     minReplicas: minReplicas
     containerRegistry: containerRegistry
+    registryPassword: registryPassword
     containerRegistryUsername: containerRegistryUsername
-    containerRegistryPassword: containerRegistryPassword
+    secrets: isPrivateRegistry ? [
+      {
+        name: registryPassword
+        value: containerRegistryPassword
+      }
+    ] : []
   }
 }
 
 
-// node App
+// Node App
 module nodeService 'container-http.bicep' = {
-  name: nodeServiceAppName
+  name: '${deployment().name}--${nodeServiceAppName}'
+  dependsOn: [
+    environment
+  ]
   params: {
+    enableIngress: true 
+    isExternalIngress: true
     location: location
+    environmentName: environmentName
     containerAppName: nodeServiceAppName
-    environmentId: environment.outputs.environmentId
     containerImage: nodeImage
     containerPort: nodePort
-    isExternalIngress: isNodeExternalIngress
     minReplicas: minReplicas
+    isPrivateRegistry: isPrivateRegistry 
     containerRegistry: containerRegistry
+    registryPassword: registryPassword
     containerRegistryUsername: containerRegistryUsername
-    containerRegistryPassword: containerRegistryPassword
     env: [
       {
         name: 'ORDER_SERVICE_NAME'
@@ -150,23 +183,29 @@ module nodeService 'container-http.bicep' = {
         value: goServiceAppName
       }
     ]
+    secrets: [
+      {
+        name: registryPassword
+        value: containerRegistryPassword
+      }
+    ]
   }
 }
 
-module apimStoreApi 'api-management-api.bicep' = {
-  name: 'store-api'
+module apimStoreApi 'api-management-api.bicep' = if (deployApim) {
+  name: '${deployment().name}--apim-store-api'
+  dependsOn: [
+    apim
+    nodeService
+  ]
   params: {
     apiName: 'store-api'
     apimInstanceName: apimName
     apiEndPointURL: 'https://${nodeService.outputs.fqdn}/swagger.json'
   }
-  dependsOn: [
-    apim
-    nodeService
-  ]
 }
 
 output nodeFqdn string = nodeService.outputs.fqdn
 output pythonFqdn string = pythonService.outputs.fqdn
 output goFqdn string = goService.outputs.fqdn
-output apimFqdn string = apim.outputs.fqdn
+output apimFqdn string = deployApim ? apim.outputs.fqdn : 'API Management not deployed'

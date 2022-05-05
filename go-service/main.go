@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	dapr "github.com/dapr/go-sdk/client"
 )
 
@@ -15,6 +17,14 @@ func main() {
 		client,
 	)
 
-	a.Run(":8050")
+	port, ok := os.LookupEnv("PORT");
+
+	if !ok {
+		port = "8050"
+	}
+
+	binding := fmt.Sprintf(":%s", port)
+
+	a.Run(binding)
 	defer client.Close()
 }

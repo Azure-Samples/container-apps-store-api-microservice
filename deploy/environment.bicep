@@ -1,7 +1,7 @@
 param environmentName string
-param logAnalyticsWorkspaceName string = 'logs-${environmentName}'
-param appInsightsName string = 'appins-${environmentName}'
-param location string = resourceGroup().location
+param logAnalyticsWorkspaceName string
+param appInsightsName string
+param location string
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-03-01-preview' = {
   name: logAnalyticsWorkspaceName
@@ -17,23 +17,22 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-03
   })
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName
   location: location
   kind: 'web'
-  properties: { 
+  properties: {
     Application_Type: 'web'
-    Flow_Type: 'Redfield'
-    Request_Source: 'CustomDeployment'
+    WorkspaceResourceId:logAnalyticsWorkspace.id
   }
 }
 
-resource environment 'Microsoft.Web/kubeEnvironments@2021-02-01' = {
+resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
   name: environmentName
   location: location
   properties: {
-    type: 'managed'
-    internalLoadBalancerEnabled: false
+    daprAIInstrumentationKey:appInsights.properties.InstrumentationKey
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -41,11 +40,9 @@ resource environment 'Microsoft.Web/kubeEnvironments@2021-02-01' = {
         sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
       }
     }
-    containerAppsConfiguration: {
-      daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
-    }
   }
 }
+
 
 output location string = location
 output environmentId string = environment.id

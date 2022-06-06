@@ -65,7 +65,7 @@ You can also deploy directly from the Azure CLI using bicep.
 2. Run the following CLI command (with appropiate values for the variables)
 
 ```cli
-az group create -n $RESOURCE_GROUP -l canadacentral
+az group create -n $RESOURCE_GROUP -l westus
 az deployment group create -g $RESOURCE_GROUP -f ./deploy/main.bicep \
   -p \
     minReplicas=0 \

@@ -1,9 +1,10 @@
 {
-    "recommendations": [
-        "ms-azuretools.vscode-dapr",
-		"ms-azuretools.vscode-docker",
-		"golang.go",
-		"ms-azuretools.vscode-bicep",
-		"ms-python.python"
-    ]
+  "recommendations": [
+    "ms-azuretools.vscode-dapr",
+    "ms-azuretools.vscode-docker",
+    "golang.go",
+    "ms-azuretools.vscode-bicep",
+    "ms-python.python",
+    "ms-azuretools.vscode-azurecontainerapps"
+  ]
 }

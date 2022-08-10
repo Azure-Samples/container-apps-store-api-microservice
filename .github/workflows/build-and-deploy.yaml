@@ -107,11 +107,11 @@ jobs:
             az deployment group create -g ${{ secrets.RESOURCE_GROUP }} -f ./deploy/main.bicep \
              -p \
                 minReplicas=0 \
-                nodeImage='${{ needs.use-build.outputs.containerImage-node }}' \
+                nodeImage='${{ needs.set-env.outputs.containerImage-node }}' \
                 nodePort=3000 \
-                pythonImage='${{ needs.use-build.outputs.containerImage-python }}' \
+                pythonImage='${{ needs.set-env.outputs.containerImage-python }}' \
                 pythonPort=5000 \
-                goImage='${{ needs.build.use-outputs.containerImage-go }}' \
+                goImage='${{ needs.set-env.use-outputs.containerImage-go }}' \
                 goPort=8050 \
                 containerRegistry=${{ env.REGISTRY }} \
                 containerRegistryUsername=${{ github.actor }} \

@@ -37,4 +37,15 @@ router.post('/', async function(req, res, next) {
   }
 });
 
+/* DELETE order by calling order microservice via dapr */
+router.post('/delete', async function(req, res ) {
+   
+  var data = await axios.delete(`${daprSidecar}/order?id=${req.body.id}`, {
+    headers: {'dapr-app-id': `${orderService}`}
+  });
+  
+  res.setHeader('Content-Type', 'application/json');
+  res.send(`${JSON.stringify(data.data)}`);
+});
+
 module.exports = router;

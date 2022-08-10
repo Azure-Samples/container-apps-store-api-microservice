@@ -61,4 +61,25 @@ def createOrder():
         finally:
             app.logger.info('created order')
 
+@app.route('/order', methods=['DELETE'])
+def deleteOrder():
+    app.logger.info('delete called in the order service')
+    with DaprClient() as d:
+        d.wait(5)
+        id = request.args.get('id')
+        if id:
+            # Delete the order status from Cosmos DB via Dapr
+            try: 
+                d.delete_state(store_name='orders', key=id)
+                return f'Item {id} successfully deleted', 200
+            except Exception as e:
+                app.logger.info(e)
+                return abort(500)
+            finally:
+                app.logger.info('completed order delete')
+        else:
+            resp = jsonify('Order "id" not found in query string')
+            resp.status_code = 400
+            return resp
+
 app.run(host='0.0.0.0', port=os.getenv('PORT', '5000'))

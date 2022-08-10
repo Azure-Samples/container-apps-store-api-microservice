@@ -4,23 +4,34 @@ on:
     branches: [main]
     # Publish semver tags as releases.
     tags: ["v*.*.*"]
+    paths-ignore:
+      - "README.md"
+      - ".vscode/**"
+      - "assets/**"
+      - "build-and-run.md"
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  build:
+  set-env:
+    name: Set Environment Variables
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        services:
-          [
-            { "imageName": "node-service", "directory": "./node-service" },
-            { "imageName": "python-service", "directory": "./python-service" },
-            { "imageName": "go-service", "directory": "./go-service" },
-          ]
+    outputs:
+      version: ${{ steps.main.outputs.version }}
+      created: ${{ steps.main.outputs.created }}
+      repository: ${{ steps.main.outputs.repository }}
+    steps:
+      - id: main
+        run: |
+          echo ::set-output name=version::$(echo ${GITHUB_SHA} | cut -c1-7)
+          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=repository::$GITHUB_REPOSITORY
+
+  package-services:
+    runs-on: ubuntu-latest
+    needs: set-env
     permissions:
       contents: read
       packages: write
@@ -28,10 +39,17 @@ jobs:
       containerImage-node: ${{ steps.image-tag.outputs.image-node-service }}
       containerImage-python: ${{ steps.image-tag.outputs.image-python-service }}
       containerImage-go: ${{ steps.image-tag.outputs.image-go-service }}
+    strategy:
+      matrix:
+        services:
+          [
+            { "appName": "node-service", "directory": "./node-service" },
+            { "appName": "python-service", "directory": "./python-service" },
+            { "appName": "go-service", "directory": "./go-service" },
+          ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
@@ -41,21 +59,19 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN}}
-
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}
+          images: ${{ env.REGISTRY }}/${{ needs.set-env.outputs.repository }}/${{ matrix.services.appName }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
             type=sha
-
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
@@ -65,11 +81,11 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
       - name: Output image tag
         id: image-tag
-        run: echo "::set-output name=image-${{ matrix.services.imageName }}::${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}:sha-$(git rev-parse --short HEAD)" | tr '[:upper:]' '[:lower:]'
-  
+        run: |
+          echo ::set-output name=image-${{ matrix.services.appName }}::${{ env.REGISTRY }}/$GITHUB_REPOSITORY/${{ matrix.services.appName }}:sha-${{ needs.set-env.outputs.version }} | tr '[:upper:]' '[:lower:]'
+
   deploy:
     if: github.repository != 'Azure-samples/container-apps-store-api-microservice'
     runs-on: ubuntu-latest

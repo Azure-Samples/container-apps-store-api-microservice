@@ -89,7 +89,7 @@ jobs:
   deploy:
     if: github.repository != 'Azure-samples/container-apps-store-api-microservice'
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [package-services]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2

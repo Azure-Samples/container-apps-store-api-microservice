@@ -111,7 +111,7 @@ jobs:
                 nodePort=3000 \
                 pythonImage='${{ needs.package-services.outputs.containerImage-python }}' \
                 pythonPort=5000 \
-                goImage='${{ needs.package-services.use-outputs.containerImage-go }}' \
+                goImage='${{ needs.package-services.outputs.containerImage-go }}' \
                 goPort=8050 \
                 containerRegistry=${{ env.REGISTRY }} \
                 containerRegistryUsername=${{ github.actor }} \

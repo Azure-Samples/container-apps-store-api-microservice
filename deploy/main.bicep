@@ -17,32 +17,70 @@ var goServiceAppName = 'go-app'
 
 param apimName string = 'store-api-mgmt-${uniqueString(resourceGroup().id)}'
 param deployApim bool = true
-param isPrivateRegistry bool = true
 
-param containerRegistry string
-param containerRegistryUsername string = 'testUser'
-@secure()
-param containerRegistryPassword string = ''
-param registryPassword string = 'registry-password'
-
-
-// Container Apps Environment 
-module environment 'environment.bicep' = {
-  name: '${deployment().name}--environment'
+// Container Apps Environment w/ CosmosDB and Component
+module myenv 'br/public:app/dapr-containerapps-environment:1.0.1' = {
+  name: environmentName
   params: {
-    environmentName: environmentName
     location: location
-    appInsightsName: '${environmentName}-ai'
-    logAnalyticsWorkspaceName: '${environmentName}-la'
+    nameseed: 'state-cos'
+    applicationEntityName: 'orders'
+    daprComponentName: 'orders'
+    daprComponentType: 'state.azure.cosmosdb'
+    daprComponentScopes: [
+      pythonServiceAppName
+    ]
   }
 }
 
-// Cosmosdb
-module cosmosdb 'cosmosdb.bicep' = {
-  name: '${deployment().name}--cosmosdb'
+// Python App
+module pythonService 'br/public:app/dapr-containerapp:1.0.1' = {
+  name: 'store-python-app'
   params: {
     location: location
-    primaryRegion: location
+    containerAppEnvName: myenv.outputs.containerAppEnvironmentName
+    externalIngress: false
+    containerAppName: pythonServiceAppName
+    containerImage: pythonImage
+    minReplicas: minReplicas 
+    targetPort: pythonPort
+  }
+}
+
+// Go App
+module goService 'br/public:app/dapr-containerapp:1.0.1' = {
+  name: 'store-go-app'
+  params: {
+    location: location
+    containerAppEnvName: myenv.outputs.containerAppEnvironmentName
+    externalIngress: false
+    containerAppName: goServiceAppName
+    containerImage: goImage
+    minReplicas: minReplicas
+    targetPort: goPort 
+  }
+}
+
+// Node App
+module nodeService 'br/public:app/dapr-containerapp:1.0.1' = {
+  name: 'store-node-app'
+  params: {
+    location: location
+    containerAppEnvName: myenv.outputs.containerAppEnvironmentName
+    containerAppName: nodeServiceAppName
+    containerImage: nodeImage
+    targetPort: nodePort
+    minReplicas: minReplicas
+    environmentVariables: [
+      {
+        name: 'ORDER_SERVICE_NAME'
+        value: pythonServiceAppName
+      }
+      {
+        name: 'INVENTORY_SERVICE_NAME'
+        value: goServiceAppName
+      }
+    ]
   }
 }
 
@@ -57,141 +95,6 @@ module apim 'api-management.bicep' = if (deployApim) {
   }
 }
 
-
-// Python App
-module pythonService 'container-http.bicep' = {
-  name: '${deployment().name}--${pythonServiceAppName}'
-  dependsOn: [
-    environment
-  ]
-  params: {
-    enableIngress: true
-    isExternalIngress: false
-    location: location
-    environmentName: environmentName
-    containerAppName: pythonServiceAppName
-    containerImage: pythonImage
-    containerPort: pythonPort
-    isPrivateRegistry: isPrivateRegistry 
-    minReplicas: minReplicas
-    containerRegistry: containerRegistry
-    registryPassword: registryPassword
-    containerRegistryUsername: containerRegistryUsername
-
-    secrets: [
-      {
-        name: registryPassword
-        value: containerRegistryPassword
-      }
-    ]
-  }
-}
-
-resource stateDaprComponent 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
-  name: '${environmentName}/orders'
-  dependsOn: [
-    environment
-  ]
-  properties: {
-    componentType: 'state.azure.cosmosdb'
-    version: 'v1'
-    secrets: [
-      {
-        name: 'masterkey'
-        value: cosmosdb.outputs.primaryMasterKey
-      }
-    ]
-    metadata: [
-      {
-        name: 'url'
-        value: cosmosdb.outputs.documentEndpoint
-      }
-      {
-        name: 'database'
-        value: 'ordersDb'
-      }
-      {
-        name: 'collection'
-        value: 'orders'
-      }
-      {
-        name: 'masterkey'
-        secretRef: 'masterkey'
-      }
-    ]
-    scopes: [
-      pythonServiceAppName
-    ]
-  }
-}
-
-// Go App
-module goService 'container-http.bicep' = {
-  name: '${deployment().name}--${goServiceAppName}'
-  dependsOn: [
-    environment
-  ]
-  params: {
-    enableIngress: true
-    isExternalIngress: false
-    location: location
-    environmentName: environmentName
-    containerAppName: goServiceAppName
-    containerImage: goImage
-    containerPort: goPort
-    isPrivateRegistry: isPrivateRegistry
-    minReplicas: minReplicas
-    containerRegistry: containerRegistry
-    registryPassword: registryPassword
-    containerRegistryUsername: containerRegistryUsername
-    secrets: isPrivateRegistry ? [
-      {
-        name: registryPassword
-        value: containerRegistryPassword
-      }
-    ] : []
-  }
-}
-
-
-// Node App
-module nodeService 'container-http.bicep' = {
-  name: '${deployment().name}--${nodeServiceAppName}'
-  dependsOn: [
-    environment
-  ]
-  params: {
-    enableIngress: true 
-    isExternalIngress: true
-    location: location
-    environmentName: environmentName
-    containerAppName: nodeServiceAppName
-    containerImage: nodeImage
-    containerPort: nodePort
-    minReplicas: minReplicas
-    isPrivateRegistry: isPrivateRegistry 
-    containerRegistry: containerRegistry
-    registryPassword: registryPassword
-    containerRegistryUsername: containerRegistryUsername
-    env: [
-      {
-        name: 'ORDER_SERVICE_NAME'
-        value: pythonServiceAppName
-      }
-      {
-        name: 'INVENTORY_SERVICE_NAME'
-        value: goServiceAppName
-      }
-    ]
-    secrets: [
-      {
-        name: registryPassword
-        value: containerRegistryPassword
-      }
-    ]
-  }
-}
-
 module apimStoreApi 'api-management-api.bicep' = if (deployApim) {
   name: '${deployment().name}--apim-store-api'
   dependsOn: [
@@ -201,11 +104,11 @@ module apimStoreApi 'api-management-api.bicep' = if (deployApim) {
   params: {
     apiName: 'store-api'
     apimInstanceName: apimName
-    apiEndPointURL: 'https://${nodeService.outputs.fqdn}/swagger.json'
+    apiEndPointURL: 'https://${nodeService.outputs.containerAppFQDN}/swagger.json'
   }
 }
 
-output nodeFqdn string = nodeService.outputs.fqdn
-output pythonFqdn string = pythonService.outputs.fqdn
-output goFqdn string = goService.outputs.fqdn
+output nodeFqdn string = nodeService.outputs.containerAppFQDN
+output pythonFqdn string = pythonService.outputs.containerAppFQDN
+output goFqdn string = goService.outputs.containerAppFQDN
 output apimFqdn string = deployApim ? apim.outputs.fqdn : 'API Management not deployed'

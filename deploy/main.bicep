@@ -1,20 +1,8 @@
 param location string = resourceGroup().location
 param environmentName string = 'env-${uniqueString(resourceGroup().id)}'
-
-param minReplicas int = 0
-
 param nodeImage string 
-param nodePort int = 3000
-var nodeServiceAppName = 'node-app'
-
 param pythonImage string
-param pythonPort int = 5000
-var pythonServiceAppName = 'python-app'
-
 param goImage string
-param goPort int = 8050
-var goServiceAppName = 'go-app'
-
 param apimName string = 'store-api-mgmt-${uniqueString(resourceGroup().id)}'
 param deployApim bool = true
 
@@ -23,12 +11,12 @@ module myenv 'br/public:app/dapr-containerapps-environment:1.0.1' = {
   name: environmentName
   params: {
     location: location
-    nameseed: 'state-cos'
+    nameseed: 'store'
     applicationEntityName: 'orders'
     daprComponentName: 'orders'
     daprComponentType: 'state.azure.cosmosdb'
     daprComponentScopes: [
-      pythonServiceAppName
+      'python-app'
     ]
   }
 }
@@ -40,10 +28,9 @@ module pythonService 'br/public:app/dapr-containerapp:1.0.1' = {
     location: location
     containerAppEnvName: myenv.outputs.containerAppEnvironmentName
     externalIngress: false
-    containerAppName: pythonServiceAppName
+    containerAppName: 'python-app'
     containerImage: pythonImage
-    minReplicas: minReplicas 
-    targetPort: pythonPort
+    targetPort: 5000
   }
 }
 
@@ -54,10 +41,9 @@ module goService 'br/public:app/dapr-containerapp:1.0.1' = {
     location: location
     containerAppEnvName: myenv.outputs.containerAppEnvironmentName
     externalIngress: false
-    containerAppName: goServiceAppName
+    containerAppName: 'go-app'
     containerImage: goImage
-    minReplicas: minReplicas
-    targetPort: goPort 
+    targetPort: 8050 
   }
 }
 
@@ -67,18 +53,18 @@ module nodeService 'br/public:app/dapr-containerapp:1.0.1' = {
   params: {
     location: location
     containerAppEnvName: myenv.outputs.containerAppEnvironmentName
-    containerAppName: nodeServiceAppName
+    containerAppName: 'node-app'
+    revisionMode: 'Multiple'
     containerImage: nodeImage
-    targetPort: nodePort
-    minReplicas: minReplicas
+    targetPort: 300
     environmentVariables: [
       {
         name: 'ORDER_SERVICE_NAME'
-        value: pythonServiceAppName
+        value: 'python-app'
       }
       {
         name: 'INVENTORY_SERVICE_NAME'
-        value: goServiceAppName
+        value: 'go-app'
       }
     ]
   }

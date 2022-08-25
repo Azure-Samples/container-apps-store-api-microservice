@@ -77,7 +77,7 @@ module pythonService 'container-http.bicep' = {
     containerRegistry: containerRegistry
     registryPassword: registryPassword
     containerRegistryUsername: containerRegistryUsername
-
+    revisionMode: 'Single'
     secrets: [
       {
         name: registryPassword
@@ -144,6 +144,7 @@ module goService 'container-http.bicep' = {
     containerRegistry: containerRegistry
     registryPassword: registryPassword
     containerRegistryUsername: containerRegistryUsername
+    revisionMode: 'Single'
     secrets: isPrivateRegistry ? [
       {
         name: registryPassword
@@ -173,6 +174,7 @@ module nodeService 'container-http.bicep' = {
     containerRegistry: containerRegistry
     registryPassword: registryPassword
     containerRegistryUsername: containerRegistryUsername
+    revisionMode: 'Multiple'
     env: [
       {
         name: 'ORDER_SERVICE_NAME'

@@ -25,9 +25,9 @@ jobs:
     steps:
       - id: main
         run: |
-          echo ::set-output name=version::$(echo ${GITHUB_SHA} | cut -c1-7)
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          echo ::set-output name=repository::$GITHUB_REPOSITORY
+          echo "version=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+          echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+          echo "repository=$GITHUB_REPOSITORY" >> $GITHUB_OUTPUT
 
   package-services:
     runs-on: ubuntu-latest
@@ -49,12 +49,12 @@ jobs:
           ]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -63,7 +63,7 @@ jobs:
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ needs.set-env.outputs.repository }}/${{ matrix.services.appName }}
           tags: |
@@ -75,7 +75,7 @@ jobs:
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ${{ matrix.services.directory }}
           push: ${{ github.event_name != 'pull_request' }}
@@ -84,18 +84,17 @@ jobs:
       - name: Output image tag
         id: image-tag
         run: |
-          echo ::set-output name=image-${{ matrix.services.appName }}::${{ env.REGISTRY }}/$GITHUB_REPOSITORY/${{ matrix.services.appName }}:sha-${{ needs.set-env.outputs.version }} | tr '[:upper:]' '[:lower:]'
-
+          echo "image-${{ matrix.services.appName }}=${{ env.REGISTRY }}/$GITHUB_REPOSITORY/${{ matrix.services.appName }}:sha-${{ needs.set-env.outputs.version }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_OUTPUT
   deploy:
     if: github.repository != 'Azure-samples/container-apps-store-api-microservice'
     runs-on: ubuntu-latest
     needs: [package-services]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 

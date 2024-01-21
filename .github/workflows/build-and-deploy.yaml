@@ -98,6 +98,7 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+          environment: 'AzureChinaCloud'
 
       - name: Deploy bicep
         uses: azure/CLI@v1
@@ -116,4 +117,4 @@ jobs:
                 containerRegistry=${{ env.REGISTRY }} \
                 containerRegistryUsername=${{ github.actor }} \
                 containerRegistryPassword=${{ secrets.GITHUB_TOKEN }} \
-                deployApim=false
+                deployApim=true

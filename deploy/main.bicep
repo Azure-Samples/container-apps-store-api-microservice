@@ -87,7 +87,7 @@ module pythonService 'container-http.bicep' = {
   }
 }
 
-resource stateDaprComponent 'Microsoft.App/managedEnvironments/daprComponents@2023-03-01-preview' = {
+resource stateDaprComponent 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
   name: '${environmentName}/orders'
   dependsOn: [
     environment

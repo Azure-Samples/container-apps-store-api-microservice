@@ -38,12 +38,12 @@ var productsSet = [
 ]
 
 //we refer to exisitng APIM instance. This may even be in a different resoruce group
-resource apiManagementService 'Microsoft.ApiManagement/service@2022-09-01-preview' existing = {
+resource apiManagementService 'Microsoft.ApiManagement/service@2022-04-01-preview' existing = {
   name: apimInstanceName
 }
 
 //establish one or many products to an existing APIM instance
-resource ProductRecords 'Microsoft.ApiManagement/service/products@2022-09-01-preview' = [for product in productsSet: {
+resource ProductRecords 'Microsoft.ApiManagement/service/products@2022-04-01-preview' = [for product in productsSet: {
   parent: apiManagementService
   name: product.productName
   properties: {
@@ -58,7 +58,7 @@ resource ProductRecords 'Microsoft.ApiManagement/service/products@2022-09-01-pre
 }]
 
 //publish the API endpint to APIM
-resource storeAPI 'Microsoft.ApiManagement/service/apis@2022-09-01-preview' = {
+resource storeAPI 'Microsoft.ApiManagement/service/apis@2022-04-01-preview' = {
   parent: apiManagementService
   name: apiName
   properties: {
@@ -69,7 +69,7 @@ resource storeAPI 'Microsoft.ApiManagement/service/apis@2022-09-01-preview' = {
 }
 
 //attach API to product(s)
-resource attachAPIToProducts 'Microsoft.ApiManagement/service/products/apis@2022-09-01-preview' = [for (product, i) in productsSet: {
+resource attachAPIToProducts 'Microsoft.ApiManagement/service/products/apis@2022-04-01-preview' = [for (product, i) in productsSet: {
   parent: ProductRecords[i]
   name: storeAPI.name
 }]

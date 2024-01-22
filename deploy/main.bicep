@@ -54,6 +54,7 @@ module apim 'api-management.bicep' = if (deployApim) {
     publisherName: 'Contoso Store'
     publisherEmail: 'demo@example.com'
     apimLocation: location
+    sku: 'Standard'
   }
 }
 

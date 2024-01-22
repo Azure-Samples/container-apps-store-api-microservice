@@ -17,7 +17,7 @@ var goServiceAppName = 'go-app'
 
 param apimName string = 'store-api-mgmt-${uniqueString(resourceGroup().id)}'
 param deployApim bool = true
-param isPrivateRegistry bool = true
+param isPrivateRegistry bool = false
 
 param containerRegistry string
 param containerRegistryUsername string = 'testUser'
@@ -54,6 +54,7 @@ module apim 'api-management.bicep' = if (deployApim) {
     publisherName: 'Contoso Store'
     publisherEmail: 'demo@example.com'
     apimLocation: location
+    sku: 'Standard'
   }
 }
 
@@ -87,7 +88,7 @@ module pythonService 'container-http.bicep' = {
   }
 }
 
-resource stateDaprComponent 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
+resource stateDaprComponent 'Microsoft.App/managedEnvironments/daprComponents@2023-04-01-preview' = {
   name: '${environmentName}/orders'
   dependsOn: [
     environment

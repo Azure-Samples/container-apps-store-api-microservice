@@ -4,7 +4,6 @@ targetScope = 'resourceGroup'
 //required parameters
 param apimInstanceName string // need to be provided since it is existing
 param apiName string
-param sku string = 'Standard'
 
 //needed and default value
 param apiEndPointURL string = 'http://petstore.swagger.io/v2/swagger.json'

@@ -25,9 +25,9 @@ jobs:
     steps:
       - id: main
         run: |
-          echo ::set-output name=version::$(echo ${GITHUB_SHA} | cut -c1-7)
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          echo ::set-output name=repository::$GITHUB_REPOSITORY
+          echo version=$(echo ${GITHUB_SHA} | cut -c1-7) >> "$GITHUB_OUTPUT"
+          echo created=$(date -u +'%Y-%m-%dT%H:%M:%SZ') >> "$GITHUB_OUTPUT"
+          echo repository=$GITHUB_REPOSITORY >> "$GITHUB_OUTPUT"
 
   package-services:
     runs-on: ubuntu-latest
@@ -84,7 +84,7 @@ jobs:
       - name: Output image tag
         id: image-tag
         run: |
-          echo ::set-output name=image-${{ matrix.services.appName }}::${{ env.REGISTRY }}/$GITHUB_REPOSITORY/${{ matrix.services.appName }}:sha-${{ needs.set-env.outputs.version }} | tr '[:upper:]' '[:lower:]'
+          echo image-${{ matrix.services.appName }}=${{ env.REGISTRY }}/$GITHUB_REPOSITORY/${{ matrix.services.appName }}:sha-${{ needs.set-env.outputs.version }} | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
 
   deploy:
     if: github.repository != 'Azure-samples/container-apps-store-api-microservice'
